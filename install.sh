@@ -14,10 +14,10 @@ fi
 mkdir -p "$HOME/.config/systemd/user"
 mkdir -p "$HOME/.local/bin"
 
-cp "$SCRIPT_DIR/firecrawl-status.sh" "$HOME/.local/bin/"
-cp "$SCRIPT_DIR/firecrawl-toggle.sh" "$HOME/.local/bin/"
-chmod +x "$HOME/.local/bin/firecrawl-status.sh"
-chmod +x "$HOME/.local/bin/firecrawl-toggle.sh"
+cp "$SCRIPT_DIR/firecrawl-status.sh" "$HOME/.local/bin/waybar-firecrawl-status"
+cp "$SCRIPT_DIR/firecrawl-toggle.sh" "$HOME/.local/bin/waybar-firecrawl-toggle"
+chmod +x "$HOME/.local/bin/waybar-firecrawl-status"
+chmod +x "$HOME/.local/bin/waybar-firecrawl-toggle"
 
 cat > "$HOME/.config/systemd/user/firecrawl.service" << 'EOF'
 [Unit]
@@ -28,6 +28,7 @@ After=network.target
 Type=simple
 WorkingDirectory=%h/firecrawl/apps/api
 ExecStart=/bin/bash -c 'source %h/firecrawl/apps/api/.env 2>/dev/null; %h/firecrawl/apps/api/node_modules/.bin/tsc && node dist/src/index.js'
+ExecStartPost=/bin/bash -c '%h/.local/bin/waybar-firecrawl-status'
 Restart=on-failure
 RestartSec=5
 Environment=HOME=%h
@@ -43,14 +44,18 @@ if grep -q "custom/firecrawl" "$HOME/.config/waybar/config.jsonc" 2>/dev/null; t
 else
     sed -i '/"modules": \[/,/\]/ { /"tray"/a\      "custom/firecrawl", }' "$HOME/.config/waybar/config.jsonc"
     
-    cat >> "$HOME/.config/waybar/config.jsonc" << 'EOF'
+    PORT=$(grep "^PORT=" "$FIRECRCRAWL_DIR/apps/api/.env" 2>/dev/null | cut -d'=' -f2)
+    PORT=${PORT:-3002}
+    
+    cat >> "$HOME/.config/waybar/config.jsonc" << EOF
 ,
   "custom/firecrawl": {
-    "exec": "~/.local/bin/firecrawl-status.sh",
+    "exec": "~/.local/bin/waybar-firecrawl-status",
     "return-type": "str",
-    "tooltip-format": "Firecrawl\nhttp://localhost:3002\n\nClick to toggle",
+    "format": "{}",
+    "tooltip-format": "Firecrawl\nhttp://192.168.1.8:${PORT}\n\nClick to toggle",
     "interval": 30,
-    "on-click": "~/.local/bin/firecrawl-toggle.sh"
+    "on-click": "~/.local/bin/waybar-firecrawl-toggle"
   }
 EOF
 fi
