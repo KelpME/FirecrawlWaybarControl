@@ -1,8 +1,11 @@
 #!/bin/bash
 
-status=$(systemctl --user is-active firecrawl.service 2>/dev/null)
+cd "$HOME/firecrawl"
 
-case "$status" in
-    active) systemctl --user stop firecrawl.service ;;
-    *) systemctl --user start firecrawl.service ;;
+CONTAINER_NAME="firecrawl-api-1"
+STATUS=$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)
+
+case "$STATUS" in
+    true) docker compose down ;;
+    *) docker compose up -d ;;
 esac

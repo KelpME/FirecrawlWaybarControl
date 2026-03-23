@@ -1,9 +1,10 @@
 #!/bin/bash
 
-status=$(systemctl --user is-active firecrawl.service 2>/dev/null)
+CONTAINER_NAME="firecrawl-api-1"
+STATUS=$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)
 
-ENV_FILE="/home/tmo/firecrawl/apps/api/.env"
-WAYBAR_CONFIG="/home/tmo/.config/waybar/config.jsonc"
+ENV_FILE="$HOME/firecrawl/apps/api/.env"
+WAYBAR_CONFIG="$HOME/.config/waybar/config.jsonc"
 CACHE_FILE="/tmp/firecrawl-port-cache"
 
 if [[ -f "$ENV_FILE" ]]; then
@@ -25,7 +26,7 @@ if [[ "$PORT" != "$CACHED_PORT" ]] && [[ -f "$WAYBAR_CONFIG" ]]; then
     echo "$PORT" > "$CACHE_FILE"
 fi
 
-case "$status" in
-    active) echo "●" ;;
+case "$STATUS" in
+    true) echo "●" ;;
     *) echo "◌" ;;
 esac
