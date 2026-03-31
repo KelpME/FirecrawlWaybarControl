@@ -14,10 +14,28 @@ fi
 mkdir -p "$HOME/.config/systemd/user"
 mkdir -p "$HOME/.local/bin"
 
+cp "$SCRIPT_DIR/firecrawl-simple.sh" "$HOME/.local/bin/waybar-firecrawl-simple"
 cp "$SCRIPT_DIR/firecrawl-status.sh" "$HOME/.local/bin/waybar-firecrawl-status"
 cp "$SCRIPT_DIR/firecrawl-toggle.sh" "$HOME/.local/bin/waybar-firecrawl-toggle"
+chmod +x "$HOME/.local/bin/waybar-firecrawl-simple"
 chmod +x "$HOME/.local/bin/waybar-firecrawl-status"
 chmod +x "$HOME/.local/bin/waybar-firecrawl-toggle"
+
+CONFIG_FILE="$HOME/.config/waybar/config.jsonc"
+WAYBAR_MODULE='"custom/firecrawl": {
+    "exec": "$HOME/.local/bin/waybar-firecrawl-simple",
+    "return-type": "json",
+    "format": "{}",
+    "interval": 5,
+    "spacing": 0,
+    "on-click": "$HOME/.local/bin/waybar-firecrawl-toggle"
+}'
+
+if [ -f "$CONFIG_FILE" ]; then
+    if ! grep -q 'custom/firecrawl' "$CONFIG_FILE"; then
+        echo "$WAYBAR_MODULE," >> "$CONFIG_FILE"
+    fi
+fi
 
 cat > "$HOME/.config/systemd/user/firecrawl.service" << 'EOF'
 [Unit]

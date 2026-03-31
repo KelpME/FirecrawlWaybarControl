@@ -27,6 +27,8 @@ if [[ "$PORT" != "$CACHED_PORT" ]] && [[ -f "$WAYBAR_CONFIG" ]]; then
 fi
 
 case "$STATUS" in
-    true) echo "●" ;;
-    *) echo "◌" ;;
+    true) ICON="●" ;;
+    *) ICON="◌" ;;
 esac
+
+echo "{\"icon\": \"$ICON\", \"tooltip\": \"Firecrawl\\nhttp://192.168.1.8:${PORT}\\nhttp://localhost:${PORT}\\n\\nClick to toggle\"}"
