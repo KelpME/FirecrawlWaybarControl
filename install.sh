@@ -31,10 +31,22 @@ WAYBAR_MODULE='"custom/firecrawl": {
     "on-click": "$HOME/.local/bin/waybar-firecrawl-toggle"
 }'
 
+WAYBAR_STYLE="$HOME/.config/waybar/style.css"
+
 if [ -f "$CONFIG_FILE" ]; then
     if ! grep -q 'custom/firecrawl' "$CONFIG_FILE"; then
         echo "$WAYBAR_MODULE," >> "$CONFIG_FILE"
     fi
+fi
+
+if ! grep -q '#custom-firecrawl {' "$WAYBAR_STYLE" 2>/dev/null; then
+    cat >> "$WAYBAR_STYLE" << 'EOF'
+
+#custom-firecrawl {
+  min-width: 12px;
+  margin-left: 7.5px;
+}
+EOF
 fi
 
 cat > "$HOME/.config/systemd/user/firecrawl.service" << 'EOF'
